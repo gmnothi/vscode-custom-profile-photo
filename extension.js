@@ -7,6 +7,8 @@ const { decodePhoto, cssFor } = require('./core');
 async function activate(context) {
   const avatar = vscode.Uri.joinPath(context.globalStorageUri, 'avatar.png');
   const css = vscode.Uri.joinPath(context.globalStorageUri, 'avatar.css');
+  // User-data storage may use vscode-userdata:, but Custom CSS accepts file: URLs.
+  const cssImport = vscode.Uri.file(css.fsPath).toString();
   const config = () => vscode.workspace.getConfiguration('vscode_custom_css');
   const readPhoto = async () => { try { return await vscode.workspace.fs.readFile(avatar); } catch { return undefined; } };
   const writePhoto = async png => {
@@ -17,9 +19,11 @@ async function activate(context) {
   async function registerCSS() {
     const imports = config().get('imports', []);
     const old = context.globalState.get('legacyImport');
-    const next = imports.filter(x => x !== old && x !== css.toString());
-    next.push(css.toString());
-    if (JSON.stringify(imports) !== JSON.stringify(next)) await config().update('imports', next, vscode.ConfigurationTarget.Global);
+    const next = imports.filter(x => x !== old && x !== css.toString() && x !== cssImport);
+    next.push(cssImport);
+    const changed = JSON.stringify(imports) !== JSON.stringify(next);
+    if (changed) await config().update('imports', next, vscode.ConfigurationTarget.Global);
+    return changed;
   }
   async function reloadCSS() {
     await vscode.commands.executeCommand('extension.updateCustomCSS');
@@ -35,7 +39,7 @@ async function activate(context) {
   async function reset() {
     const imports = config().get('imports', []);
     const old = context.globalState.get('legacyImport');
-    await config().update('imports', imports.filter(x => x !== css.toString() && x !== old), vscode.ConfigurationTarget.Global);
+    await config().update('imports', imports.filter(x => x !== css.toString() && x !== cssImport && x !== old), vscode.ConfigurationTarget.Global);
     // Keep the saved crop available so Reset can be undone with Reapply.
     await context.globalState.update('enabled', false);
     await reloadCSS();
@@ -96,6 +100,11 @@ async function activate(context) {
     }
   }
   if (await readPhoto() && context.globalState.get('enabled') !== false) {
+    const repaired = await registerCSS();
+    if (repaired) {
+      await reloadCSS();
+      return;
+    }
     const version = context.globalState.get('lastNotifiedVersion');
     if (version !== vscode.version) {
       await context.globalState.update('lastNotifiedVersion', vscode.version);

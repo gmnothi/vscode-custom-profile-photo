@@ -23,19 +23,20 @@ test('migration, crop save, reset, reapply and activation after restart preserve
   const legacy=path.join(tmp,'vscode-avatar','avatar.css');await fs.mkdir(path.dirname(legacy));await fs.writeFile(legacy,cssFor(crop()));
   let imports=['file:///keep.css',uri(legacy).toString()],messages=[],receive,html;
   const state=new Map(),commands=new Map(),calls=[];
-  const context={extensionUri:uri(path.resolve(__dirname,'..')),globalStorageUri:uri(path.join(tmp,'storage')),subscriptions:[],globalState:{get:k=>state.get(k),update:async(k,v)=>state.set(k,v)}};
-  const v={version:'1.100.0',ConfigurationTarget:{Global:1},ViewColumn:{Active:1},Uri:{joinPath:(u,...p)=>uri(path.join(u.fsPath,...p)),parse:s=>uri(require('node:url').fileURLToPath(s))},workspace:{getConfiguration:()=>({get:()=>imports,update:async(k,v)=>{imports=v}}),fs:{readFile:u=>fs.readFile(u.fsPath),writeFile:(u,d)=>fs.writeFile(u.fsPath,d),createDirectory:u=>fs.mkdir(u.fsPath,{recursive:true})}},commands:{registerCommand:(k,f)=>{commands.set(k,f);return{dispose(){}}},executeCommand:async k=>{calls.push(k);if(commands.has(k))return commands.get(k)()}},window:{showInformationMessage:async()=>undefined,showErrorMessage:m=>{throw Error(m)},createWebviewPanel:()=>({webview:{set html(x){html=x},postMessage:async m=>messages.push(m),onDidReceiveMessage:f=>{receive=f}},onDidDispose(){},reveal(){}})}};
+  const context={extensionUri:uri(path.resolve(__dirname,'..')),globalStorageUri:{fsPath:path.join(tmp,'storage'),toString:()=> 'vscode-userdata:'+path.join(tmp,'storage')},subscriptions:[],globalState:{get:k=>state.get(k),update:async(k,v)=>state.set(k,v)}};
+  const v={version:'1.100.0',ConfigurationTarget:{Global:1},ViewColumn:{Active:1},Uri:{file:uri,joinPath:(u,...p)=>{const r=uri(path.join(u.fsPath,...p));if(u.toString().startsWith('vscode-userdata:'))r.toString=()=> 'vscode-userdata:'+r.fsPath;return r},parse:s=>uri(require('node:url').fileURLToPath(s))},workspace:{getConfiguration:()=>({get:()=>imports,update:async(k,v)=>{imports=v}}),fs:{readFile:u=>fs.readFile(u.fsPath),writeFile:(u,d)=>fs.writeFile(u.fsPath,d),createDirectory:u=>fs.mkdir(u.fsPath,{recursive:true})}},commands:{registerCommand:(k,f)=>{commands.set(k,f);return{dispose(){}}},executeCommand:async k=>{calls.push(k);if(commands.has(k))return commands.get(k)()}},window:{showInformationMessage:async()=>undefined,showErrorMessage:m=>{throw Error(m)},createWebviewPanel:()=>({webview:{set html(x){html=x},postMessage:async m=>messages.push(m),onDidReceiveMessage:f=>{receive=f}},onDidDispose(){},reveal(){}})}};
   const source=await fs.readFile(path.resolve(__dirname,'../extension.js'),'utf8'),module={exports:{}};
   const native=createRequire(path.resolve(__dirname,'../extension.js'));
   vm.runInNewContext(source,{require:n=>n==='vscode'?v:native(n),module,Buffer,console});
   await module.exports.activate(context);
-  assert.equal(imports.length,2);assert.ok(imports.includes('file:///keep.css'));assert.ok(!imports.includes(uri(legacy).toString()));
+  assert.equal(imports.length,2);assert.ok(imports.every(x=>x.startsWith('file:')));assert.ok(imports.includes('file:///keep.css'));assert.ok(!imports.includes(uri(legacy).toString()));
   await commands.get('customProfilePhoto.open')();assert.match(html,/Content-Security-Policy/);assert.ok(!html.includes('NONCE'));
   await receive({type:'ready'});assert.equal(messages.at(-1).type,'photo');
   await receive({type:'save',data:'data:image/png;base64,'+crop().toString('base64')});assert.equal(messages.at(-1).type,'saved');assert.equal(calls.at(-1),'extension.updateCustomCSS');
   await commands.get('customProfilePhoto.reset')();assert.deepEqual(imports,['file:///keep.css']);assert.equal(state.get('enabled'),false);
   assert.deepEqual(await fs.readFile(path.join(tmp,'storage/avatar.png')),crop());
   await commands.get('customProfilePhoto.apply')();assert.equal(imports.length,2);assert.equal(state.get('enabled'),true);
-  await module.exports.activate(context);assert.equal(imports.length,2);assert.deepEqual(await fs.readFile(path.join(tmp,'storage/avatar.png')),crop());
+  imports[1]='vscode-userdata:'+path.join(tmp,'storage/avatar.css');
+  await module.exports.activate(context);assert.ok(imports.every(x=>x.startsWith('file:')));assert.equal(imports.length,2);assert.deepEqual(await fs.readFile(path.join(tmp,'storage/avatar.png')),crop());
  }finally{await fs.rm(tmp,{recursive:true,force:true});}
 });

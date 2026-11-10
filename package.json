@@ -2,7 +2,7 @@
   "name": "custom-profile-photo",
   "displayName": "Custom Profile Photo",
   "description": "Crop a local photo for your VS Code Accounts icon.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "gurman-local",
   "license": "MIT",
   "engines": {
