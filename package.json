@@ -1,0 +1,59 @@
+{
+  "name": "custom-profile-photo",
+  "displayName": "Custom Profile Photo",
+  "description": "Crop a local photo for your VS Code Accounts icon.",
+  "version": "0.1.0",
+  "publisher": "gurman-local",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "extensionKind": [
+    "ui"
+  ],
+  "extensionDependencies": [
+    "be5invis.vscode-custom-css"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "package": "vsce package",
+    "check": "node --check extension.js && node --check core.js && npm test"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "customProfilePhoto.open",
+        "title": "Custom Profile Photo: Choose or Crop Photo"
+      },
+      {
+        "command": "customProfilePhoto.apply",
+        "title": "Custom Profile Photo: Reapply Saved Photo"
+      },
+      {
+        "command": "customProfilePhoto.reset",
+        "title": "Custom Profile Photo: Reset to Default Icon"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gmnothi/vscode-custom-profile-photo.git"
+  },
+  "homepage": "https://github.com/gmnothi/vscode-custom-profile-photo#readme",
+  "bugs": {
+    "url": "https://github.com/gmnothi/vscode-custom-profile-photo/issues"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "4.1.0"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+*.vsix
+.DS_Store
+.env*
+!.env.example
+avatar.png
+avatar.css
+settings*.json
+coverage/
