@@ -10,3 +10,8 @@ settings*.json
 PUBLISHING.md
 .gitignore
 .vscodeignore
+
+output/**
+
+.playwright-cli/**
+assets/demo-landscape.svg

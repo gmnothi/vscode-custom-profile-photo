@@ -17,7 +17,7 @@ The repository and the Marketplace listing are separate. This project is configu
    npm run package
    ```
 
-4. On the publisher management page, choose **New extension → Visual Studio Code**, upload `custom-profile-photo-0.1.1.vsix`, review the listing, and submit it. This manual upload route does not require putting a publisher token into this repository.
+4. On the publisher management page, choose **New extension → Visual Studio Code**, upload `custom-profile-photo-0.1.2.vsix`, review the listing, and submit it. This manual upload route does not require putting a publisher token into this repository.
 5. For later versions, bump `package.json` (for example, `npm version patch`), rebuild, and upload the new VSIX to the existing listing.
 
 Before submitting, verify the cropper, Apply, Reset, and Reapply in a real Extension Development Host. The current automated checks exercise saved-photo persistence and CSS configuration with mocked VS Code APIs; they do not establish live compatibility across VS Code releases. Add a demo screenshot that contains no private source, accounts, or photos you do not intend to publish. The README must continue to disclose the Custom CSS dependency, application patching, integrity warnings, and reapply requirement.

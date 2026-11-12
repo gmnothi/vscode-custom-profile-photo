@@ -1,8 +1,8 @@
 {
   "name": "custom-profile-photo",
   "displayName": "Custom Profile Photo",
-  "description": "Crop a local photo for your VS Code Accounts icon.",
-  "version": "0.1.1",
+  "description": "Make VS Code feel like yours. Choose a photo, crop it, and personalize your Accounts icon.",
+  "version": "0.1.2",
   "publisher": "GurmanOthi",
   "license": "MIT",
   "engines": {
@@ -55,5 +55,18 @@
   },
   "overrides": {
     "minimatch": "^11.0.1"
+  },
+  "icon": "assets/icon.png",
+  "keywords": [
+    "avatar",
+    "profile",
+    "photo",
+    "personalization",
+    "crop",
+    "accounts"
+  ],
+  "galleryBanner": {
+    "color": "#101014",
+    "theme": "dark"
   }
 }
